@@ -1,9 +1,34 @@
 package testApp
 
-import java.time.Instant
-import java.sql.Timestamp
+import java.time.format.DateTimeFormatter
+import java.time.{Instant, LocalDate, ZoneId}
 
-object TrackerLevelTypeEnum extends Enumeration {
+import upickle.default.{macroRW, ReadWriter => RW, _}
+
+trait InstantPickler {
+
+  val formatter = DateTimeFormatter
+    .ofPattern("yyyy-MM-dd'T'hh:mm:ssxxx")
+    .withZone(ZoneId.systemDefault());
+
+  implicit val rwInstant: RW[Instant] = readwriter[String].bimap[Instant](
+    zonedDateTime => formatter.format(zonedDateTime),
+    str =>
+      LocalDate
+        .parse(str, formatter)
+        .atStartOfDay(ZoneId.systemDefault())
+        .toInstant()
+  )
+}
+
+trait uPickleEnum {
+  self: Enumeration =>
+  implicit val rwEnum: RW[Value] = readwriter[String]
+    .bimap[Value](_.toString, withName)
+}
+object InstantPickler extends InstantPickler
+
+object TrackerLevelTypeEnum extends Enumeration with uPickleEnum {
 
   type TrackerLevelType = Value
 
@@ -12,9 +37,10 @@ object TrackerLevelTypeEnum extends Enumeration {
   val MR_LOG_WARN = Value("MR_LOG_WARN")
   val MR_LOG_INFO = Value("MR_LOG_INFO")
   val MR_LOG_TRACE = Value("MR_LOG_TRACE")
+
 }
 
-object OfferGroupExpandableTypeEnum extends Enumeration {
+object OfferGroupExpandableTypeEnum extends Enumeration with uPickleEnum {
 
   type OfferGroupExpandableType = Value
 
@@ -24,7 +50,7 @@ object OfferGroupExpandableTypeEnum extends Enumeration {
   val OFFERGROUPEXPANDABLE_UNKNOWN = Value("OFFERGROUPEXPANDABLE_UNKNOWN")
 }
 
-object OfferDispositionTypeEnum extends Enumeration {
+object OfferDispositionTypeEnum extends Enumeration with uPickleEnum {
 
   type OfferDispositionType = Value
 
@@ -34,7 +60,9 @@ object OfferDispositionTypeEnum extends Enumeration {
   val OFFERDISPOSITION_NOTPITCHED = Value("OFFERDISPOSITION_NOTPITCHED")
 }
 
-object OfferGroupClosingDispositionTypeEnum extends Enumeration {
+object OfferGroupClosingDispositionTypeEnum
+    extends Enumeration
+    with uPickleEnum {
 
   type OfferGroupClosingDispositionType = Value
 
@@ -46,7 +74,7 @@ object OfferGroupClosingDispositionTypeEnum extends Enumeration {
   )
 }
 
-object OfferGroupDispositionLevelTypeEnum extends Enumeration {
+object OfferGroupDispositionLevelTypeEnum extends Enumeration with uPickleEnum {
 
   type OfferGroupDispositionLevelType = Value
 
@@ -58,7 +86,7 @@ object OfferGroupDispositionLevelTypeEnum extends Enumeration {
   )
 }
 
-object ValueTypeEnum extends Enumeration {
+object ValueTypeEnum extends Enumeration with uPickleEnum {
 
   type ValueType = Value
 
@@ -84,7 +112,7 @@ object ValueTypeEnum extends Enumeration {
 
 }
 
-object PitchTypeEnum extends Enumeration {
+object PitchTypeEnum extends Enumeration with uPickleEnum {
 
   type PitchType = Value
 
@@ -96,7 +124,7 @@ object PitchTypeEnum extends Enumeration {
 
 }
 
-object IHActionTypeEnum extends Enumeration {
+object IHActionTypeEnum extends Enumeration with uPickleEnum {
 
   type IHActionType = Value
 
@@ -110,7 +138,7 @@ object IHActionTypeEnum extends Enumeration {
 
 }
 
-import ValueTypeEnum.ValueType
+import testApp.ValueTypeEnum.ValueType
 @SerialVersionUID(100L)
 class CommonValue(var valueType: ValueType,
                   var rstringValue: String,
@@ -178,7 +206,7 @@ class RealtimeContextDataType(var requestID: String = "",
   }
 }
 
-import TrackerLevelTypeEnum.TrackerLevelType
+import testApp.TrackerLevelTypeEnum.TrackerLevelType
 
 @SerialVersionUID(100L)
 class RequestType5(var trackerLevel: TrackerLevelType,
@@ -253,10 +281,10 @@ class RequestType10(
 class RequestType15(var requestType10: RequestType10,
                     var ih: List[IHDataRecordType])
 
-import PitchTypeEnum.PitchType
-import IHActionTypeEnum.IHActionType
+import testApp.IHActionTypeEnum.IHActionType
+import testApp.PitchTypeEnum.PitchType
 @SerialVersionUID(100L)
-class IHDataRecordType(
+case class IHDataRecordType(
   //  BanType accountId,
   var accountId: Int = 0,
   var ihAsfTmstmpStr: String = "",
@@ -316,6 +344,10 @@ class IHDataRecordType(
   var ih_rank: Int = 0,
   var ih_position: Int = 0
 ) extends Serializable
+
+object IHDataRecordType extends InstantPickler {
+  implicit val rw: RW[IHDataRecordType] = macroRW
+}
 
 class ProfileAttributeListType(var attr: List[CommonValue])
 
@@ -384,10 +416,10 @@ class PromoToBaseInfoType(var promoOfferId: String,
                           var sequence: Int)
     extends Serializable
 
-import OfferGroupExpandableTypeEnum.OfferGroupExpandableType
-import OfferGroupDispositionLevelTypeEnum.OfferGroupDispositionLevelType
-import OfferGroupClosingDispositionTypeEnum.OfferGroupClosingDispositionType
-import OfferDispositionTypeEnum.OfferDispositionType
+import testApp.OfferDispositionTypeEnum.OfferDispositionType
+import testApp.OfferGroupClosingDispositionTypeEnum.OfferGroupClosingDispositionType
+import testApp.OfferGroupDispositionLevelTypeEnum.OfferGroupDispositionLevelType
+import testApp.OfferGroupExpandableTypeEnum.OfferGroupExpandableType
 @SerialVersionUID(100L)
 class CurrentPropositionInfoListType(
   var parentPosition: Int,
