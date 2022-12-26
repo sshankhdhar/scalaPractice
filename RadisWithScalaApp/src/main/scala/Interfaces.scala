@@ -3,6 +3,7 @@ package testApp
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDate, ZoneId}
 
+import testApp.IHActionType.IHActionType
 import upickle.default.{macroRW, ReadWriter => RW, _}
 
 trait InstantPickler {
@@ -21,22 +22,21 @@ trait InstantPickler {
   )
 }
 
-trait uPickleEnum {
+trait uPickleEnum extends Serializable {
   self: Enumeration =>
   implicit val rwEnum: RW[Value] = readwriter[String]
     .bimap[Value](_.toString, withName)
 }
 object InstantPickler extends InstantPickler
 
-object TrackerLevelTypeEnum extends Enumeration with uPickleEnum {
+object TrackerLevelTypeEnum
+    extends Enumeration
+    with uPickleEnum
+    with Serializable {
 
   type TrackerLevelType = Value
 
-  val MR_LOG_NONE = Value("MR_LOG_NONE")
-  val MR_LOG_ERROR = Value("MR_LOG_ERROR")
-  val MR_LOG_WARN = Value("MR_LOG_WARN")
-  val MR_LOG_INFO = Value("MR_LOG_INFO")
-  val MR_LOG_TRACE = Value("MR_LOG_TRACE")
+  val MR_LOG_NONE, MR_LOG_ERROR, MR_LOG_WARN, MR_LOG_INFO, MR_LOG_TRACE = Value
 
 }
 
@@ -124,17 +124,13 @@ object PitchTypeEnum extends Enumeration with uPickleEnum {
 
 }
 
-object IHActionTypeEnum extends Enumeration with uPickleEnum {
+object IHActionType extends Enumeration with uPickleEnum {
 
   type IHActionType = Value
 
-  val IHACTION_TYPE_ACCEPTED = Value("IHACTION_TYPE_ACCEPTED")
-  val IHACTION_TYPE_DECLINED = Value("IHACTION_TYPE_DECLINED")
-  val IHACTION_TYPE_MAYBE_LATER = Value("IHACTION_TYPE_MAYBE_LATER")
-  val IHACTION_TYPE_NOT_PITCHED = Value("IHACTION_TYPE_NOT_PITCHED")
-  val IHACTION_TYPE_UNDEFINED = Value("IHACTION_TYPE_UNDEFINED")
-  val IHACTION_TYPE_CARD_ACCEPTED = Value("IHACTION_TYPE_CARD_ACCEPTED")
-  val IHACTION_TYPE_CARD_DECLINED = Value("IHACTION_TYPE_CARD_DECLINED")
+  val IHACTION_TYPE_ACCEPTED, IHACTION_TYPE_DECLINED, IHACTION_TYPE_MAYBE_LATER,
+  IHACTION_TYPE_NOT_PITCHED, IHACTION_TYPE_UNDEFINED,
+  IHACTION_TYPE_CARD_ACCEPTED, IHACTION_TYPE_CARD_DECLINED = Value
 
 }
 
@@ -281,69 +277,69 @@ class RequestType10(
 class RequestType15(var requestType10: RequestType10,
                     var ih: List[IHDataRecordType])
 
-import testApp.IHActionTypeEnum.IHActionType
+import testApp.IHActionType
 import testApp.PitchTypeEnum.PitchType
 @SerialVersionUID(100L)
 case class IHDataRecordType(
-  //  BanType accountId,
-  var accountId: Int = 0,
-  var ihAsfTmstmpStr: String = "",
-  var decisionResultID: String = "",
-  var originatorSessionID: String = "",
-  var eventType: String = "",
-  var acvMinimum: Float = 0,
-  var acvFactor: Float = 0,
-  var acvReinvestmentAmount: Float = 0,
-  var ampuMinimum: Float = 0,
-  var ampuFactor: Float = 0,
-  var ampuReinvestmentAmount: Float = 0,
-  var customDimensionItem: String = "",
-  var pendingResponseFlag: Boolean = false,
-  var agentRole: String = "",
-  var ihAsfTmstmp: Instant = null,
-  var category: String = "",
-  var displayCategory: String = "",
-  var reason: String = "",
-  var Mode: String = "",
-  var propositionId: String = "",
-  //DataSetType propositionDataSetID,
-  var propositionDataSetID: String = "",
-  var rank: Int = 0,
-  var position: Int = 0,
-  var parentPosition: Int = 0,
-  //PitchType pitchType,
-  var pitchType: PitchType = PitchTypeEnum.PITCHTYPE_REACTIVE,
-  //IHActionType response,
-  var response: IHActionType = IHActionTypeEnum.IHACTION_TYPE_ACCEPTED,
-  var positiveFlag: Boolean = false,
-  var reinvestment: Boolean = false,
-  var offerGroup: String = "",
-  var parentOfferGroup: String = "",
-  var expanded: Boolean = false,
-  var businessGoal: String = "",
-  var resp_tmstmp: String = "",
-  var typeHdr: String = "",
-  var originator: String = "",
-  var businessProcessName: String = "",
-  var sequenceNumber: String = "",
-  var expirationSeconds: String = "",
-  var userId: String = "",
-  var userGroup: String = "",
-  var serviceName: String = "",
-  var serviceVersion: String = "",
-  //com.att.streams.tdata.mr.common::CallIntentType callIntentLevel1Code,
-  var callIntentLevel1Code: String = "",
-  //com.att.streams.tdata.mr.common::CallIntentType callIntentLevel2Code,
-  var callIntentLevel2Code: String = "",
-  //list<com.att.streams.tdata.mr.common::CallIntentType> callIntentLevel3CodeList,
-  var callIntentLevel3CodeList: List[String] = List(),
-  var dataSource: String = "",
-  var agentID: String = "",
-  //list<var> productDisconnect,
-  var productDisconnect: List[String] = List(),
-  var ih_rank: Int = 0,
-  var ih_position: Int = 0
-) extends Serializable
+                            //  BanType accountId,
+                            var accountId: Int = 0,
+                            var ihAsfTmstmpStr: String = "",
+                            var decisionResultID: String = "",
+                            var originatorSessionID: String = "",
+                            var eventType: String = "",
+                            var acvMinimum: Float = 0,
+                            var acvFactor: Float = 0,
+                            var acvReinvestmentAmount: Float = 0,
+                            var ampuMinimum: Float = 0,
+                            var ampuFactor: Float = 0,
+                            var ampuReinvestmentAmount: Float = 0,
+                            var customDimensionItem: String = "",
+                            var pendingResponseFlag: Boolean = false,
+                            var agentRole: String = "",
+                            var ihAsfTmstmp: Instant = null,
+                            var category: String = "",
+                            var displayCategory: String = "",
+                            var reason: String = "",
+                            var Mode: String = "",
+                            var propositionId: String = "",
+                            //DataSetType propositionDataSetID,
+                            var propositionDataSetID: String = "",
+                            var rank: Int = 0,
+                            var position: Int = 0,
+                            var parentPosition: Int = 0,
+                            //PitchType pitchType,
+                            var pitchType: PitchType = null,
+                            //IHActionType response,
+                            var response: IHActionType = null,
+                            var positiveFlag: Boolean = false,
+                            var reinvestment: Boolean = false,
+                            var offerGroup: String = "",
+                            var parentOfferGroup: String = "",
+                            var expanded: Boolean = false,
+                            var businessGoal: String = "",
+                            var resp_tmstmp: String = "",
+                            var typeHdr: String = "",
+                            var originator: String = "",
+                            var businessProcessName: String = "",
+                            var sequenceNumber: String = "",
+                            var expirationSeconds: String = "",
+                            var userId: String = "",
+                            var userGroup: String = "",
+                            var serviceName: String = "",
+                            var serviceVersion: String = "",
+                            //com.att.streams.tdata.mr.common::CallIntentType callIntentLevel1Code,
+                            var callIntentLevel1Code: String = "",
+                            //com.att.streams.tdata.mr.common::CallIntentType callIntentLevel2Code,
+                            var callIntentLevel2Code: String = "",
+                            //list<com.att.streams.tdata.mr.common::CallIntentType> callIntentLevel3CodeList,
+                            var callIntentLevel3CodeList: List[String] = List(),
+                            var dataSource: String = "",
+                            var agentID: String = "",
+                            //list<var> productDisconnect,
+                            var productDisconnect: List[String] = List(),
+                            var ih_rank: Int = 0,
+                            var ih_position: Int = 0)
+    extends Serializable
 
 object IHDataRecordType extends InstantPickler {
   implicit val rw: RW[IHDataRecordType] = macroRW

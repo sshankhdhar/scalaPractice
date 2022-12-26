@@ -1,8 +1,9 @@
 package testApp
 
+import com.redis.RedisClient
 import upickle.default._
 
-object scala extends App {
+object dscscds extends App {
 
   def connectToRedis: Map[String, Map[String, Map[Int, IHDataRecordType]]] = {
 //    val r = new RedisClient("localhost", 6379)
@@ -15,10 +16,11 @@ object scala extends App {
     val ihMap = Some(
       Map(
         "67645" ->
-          """{"test123": { "111": {"accountId": 22 ,"ihAsfTmstmpStr":"somedfvvalue","decisionResultID":"somevalue", "eventType":"Confirm Shopping Cart" }, "222" : {"accountId":"000","ihAsfTmstmpStr":"somevalue" } } ,
-            |  "test456": { "111": {"accountId": 32 ,"ihAsfTmstmpStr":"some44value","decisionResultID":"somevalue", "eventType":"Confirm Shopping Cart"}, "222" : {"accountId":"000","ihAsfTmstmpStr":"somevalue" } } }""".stripMargin
+          """{"test123": { "111": {"accountId": 22 ,"ihAsfTmstmpStr":"somedfvvalue","decisionResultID":"somevalue", "eventType":"Confirm Shopping Cart", "response": "IHACTION_TYPE_ACCEPTED"}, "222" : {"accountId":"000","ihAsfTmstmpStr":"somevalue" } } , "test456": { "111": {"accountId": 32 ,"ihAsfTmstmpStr":"some44value","decisionResultID":"somevalue", "eventType":"Confirm Shopping Cart"}, "222" : {"accountId":"000","ihAsfTmstmpStr":"somevalue" } } }"""
       )
     )
+
+    // HMSET ihmap 67645 "{\"test123\": { \"111\": {\"accountId\": 22 ,\"ihAsfTmstmpStr\":\"somedfvvalue\",\"decisionResultID\":\"somevalue\", \"eventType\":\"Confirm Shopping Cart\", \"response\": \"IHACTION_TYPE_ACCEPTED\" }, \"222\" :{\"accountId\":\"000\",\"ihAsfTmstmpStr\":\"somevalue\", \"response\": \"IHACTION_TYPE_ACCEPTED\" } } , \"test456\": { \"345\": {\"accountId\": 32 ,\"ihAsfTmstmpStr\":\"some44value\",\"decisionResultID\":\"somevalue\", \"eventType\":\"Confirm Shopping Cart\" , \"response\": \"IHACTION_TYPE_ACCEPTED\" } } }"
 
     ihMap.get.map { singleStream: (String, String) =>
       singleStream._1 -> read[Map[String, Map[Int, IHDataRecordType]]](
@@ -40,6 +42,8 @@ object scala extends App {
   var record: IHDataRecordType = new IHDataRecordType(
     eventType = "Confirm Shopping Cart"
   )
+
+  var sdcsd = scala.collection.mutable.Map()
 
   var ihMap: Map[String, Map[String, Map[Int, IHDataRecordType]]] =
     connectToRedis // need verification on the Type of this "ihMap" variable
@@ -67,8 +71,14 @@ object scala extends App {
       if (!foundConfirm)
         includeAccepts = false;
     }
-    sessionData.foreach { ihTransaction =>
-      if ((IHActionTypeEnum.IHACTION_TYPE_ACCEPTED == ihTransaction._2.response) && includeAccepts || (IHActionTypeEnum.IHACTION_TYPE_DECLINED == ihTransaction._2.response)) {
+    sessionData.foreach { ihTransaction: (Int, IHDataRecordType) =>
+      println(
+        "condition is : " + ((IHActionType.IHACTION_TYPE_ACCEPTED == ihTransaction._2.response) && includeAccepts || (IHActionType.IHACTION_TYPE_DECLINED == ihTransaction._2.response))
+      )
+      println(IHActionType.IHACTION_TYPE_ACCEPTED == ihTransaction._2.response)
+      println(includeAccepts)
+      println(IHActionType.IHACTION_TYPE_DECLINED == ihTransaction._2.response)
+      if ((IHActionType.IHACTION_TYPE_ACCEPTED == ihTransaction._2.response) && includeAccepts || (IHActionType.IHACTION_TYPE_DECLINED == ihTransaction._2.response)) {
         val someresult: Map[Int, IHDataRecordType] = sessionData ++ Map(
           (requestIH._1, requestIH._2)
         )
