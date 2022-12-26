@@ -12,5 +12,7 @@ metals.sbt
 ######################
 .DS_Store
 .DS_Store?
-/target/
-/.idea/
+/RadisWithScalaApp/.idea/
+/RadisWithScalaApp/target/
+/rock-the-jvm-scala-beginners/target/
+/rock-the-jvm-scala-beginners/.idea/
