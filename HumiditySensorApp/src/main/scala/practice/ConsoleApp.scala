@@ -15,7 +15,7 @@ object ConsoleApp extends App {
       .map(_.toInt)
       .sorted
       .foldRight(Seq[String]()) {
-        case (x, y) => {
+        case (x: Int, y: Seq[String]) => {
           if (!y.contains(x + "-a")) {
             y ++ Seq(x + "-a")
           } else y
@@ -25,4 +25,29 @@ object ConsoleApp extends App {
   }
   println(RemmoveDuplicate(List("1", "10", "34", "56", "7", "2", "56", "10")))
 
+  val sdfsdf = new A("sdfde", "dsfe")
+
+  val sdfsdfdsf = new A("sdfde", "dsfe")
+
+  val sdfsdfsdcsd = new A("sdfde", "dsfe")
+
+}
+trait Parent {
+  def methodA: Unit;
+
+  val sdfds = "sdfds"
+}
+
+class B(A: String, B: String) {
+  def methodA: Unit = {
+    println("sdfcds")
+  }
+}
+class A(A: String, B: String) {
+  def methodA: Unit = {
+    "";
+  }
+}
+object A {
+  def methodA: Unit = {}
 }
